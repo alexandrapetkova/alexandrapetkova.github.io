@@ -1,31 +1,66 @@
-<html>
-  <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  </head>
-  <body>
-    <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 2;" color-space="sRGB"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AR Video</title>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+  <a-scene mindar-image="imageTargetSrc: targets.mind; maxTrack: 2;" color-space="sRGB"
     renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false"
     device-orientation-permission-ui="enabled: false">
-      <a-assets timeout="0">
-         <video id="vid1" src="videos/VIDEO0.mp4" preload="none" loop playsinline muted
+    <a-assets timeout="0">
+      <video id="vid1" src="videos/VIDEO0.mp4" preload="auto" loop playsinline muted
         crossorigin="anonymous"></video>
-      <video id="vid2" src="videos/VIDEO1.mp4" preload="none" loop playsinline muted
+      <video id="vid2" src="videos/VIDEO1.mp4" preload="auto" loop playsinline muted
         crossorigin="anonymous"></video>
-      </a-assets>
+    </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-       <a-entity id="target0" mindar-image-target="targetIndex: 0">
+    <a-entity id="target0" mindar-image-target="targetIndex: 0">
       <a-video src="#vid1" position="0 0 0" width="0.562" height="1" rotation="0 0 0"></a-video>
     </a-entity>
 
     <a-entity id="target1" mindar-image-target="targetIndex: 1">
       <a-video src="#vid2" position="0 0 0" width="0.707" height="1" rotation="0 0 0"></a-video>
     </a-entity>
+  </a-scene>
 
-    </a-scene>
-  </body>
+  <script>
+    const vid1 = document.querySelector("#vid1");
+    const vid2 = document.querySelector("#vid2");
+    const target0 = document.querySelector("#target0");
+    const target1 = document.querySelector("#target1");
+
+    // Unlock autoplay after the first tap (needed on some iOS versions)
+    const unlock = () => {
+      [vid1, vid2].forEach((video) => {
+        video.play().then(() => video.pause()).catch(() => {});
+      });
+      document.body.removeEventListener("click", unlock);
+      document.body.removeEventListener("touchstart", unlock);
+    };
+    document.body.addEventListener("click", unlock);
+    document.body.addEventListener("touchstart", unlock);
+
+    target0.addEventListener("targetFound", () => {
+      vid1.currentTime = 0;
+      vid1.play().catch(() => {});
+    });
+    target0.addEventListener("targetLost", () => {
+      vid1.pause();
+    });
+
+    target1.addEventListener("targetFound", () => {
+      vid2.currentTime = 0;
+      vid2.play().catch(() => {});
+    });
+    target1.addEventListener("targetLost", () => {
+      vid2.pause();
+    });
+  </script>
+</body>
 </html>
